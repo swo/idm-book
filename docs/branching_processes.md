@@ -1,5 +1,7 @@
 # Branching processes
 
+Mostly from Jagers _Branching Processes with Biological Applications_ (1975).
+
 ## Notation and basic definitions
 
 ### Space of all possible descendants
