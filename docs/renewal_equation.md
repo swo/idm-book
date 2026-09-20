@@ -31,3 +31,19 @@ Divide by $i(t)$ to find:
 $$
   r(t) = \frac{R'(t)}{R(t)} + \frac{R(t)}{i(t)} \int_0^t i(s) w'(t - s) \,ds
 $$
+
+## Euler-Lotka / Wallinga-Lipsitch
+
+Assume $r(t)$ is quasi-constant over durations $a$, so that
+
+$$
+  \int_{t-a}^t r(s) \,ds \approx r(t) \times a
+$$
+
+Then? (what's the logic?)
+
+$$
+  \frac{1}{R(t)} \approx \int_0^t e^{-r(t) \cdot a} w(a) \,da
+$$
+
+E.g., if $w$ is a delta function, then $R(t) \approx e^{-Tr(t)}$.
