@@ -14,3 +14,8 @@ jobs:
 
       - name: Run prek
         uses: j178/prek-action@v3.0.0
+        with:
+          extra-args: >-
+            ${{ github.event_name == 'push' && github.ref_name == 'main'
+                && '--all-files --skip no-commit-to-branch'
+                || '--all-files' }}
