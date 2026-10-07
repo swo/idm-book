@@ -87,7 +87,7 @@ If $w(\tau)$ is exponentially distributed, with mean $\tau^\star$, then $M_w(z) 
 
 ### Time discretization
 
-For sufficiently small time slices $\Delta t$, we can approximate $I(t)$, $R(t)$, and $w(\tau)$ as approximately stepwise constant.
+For sufficiently small time slices $\Delta t$, we can approximate continuous-time-varying quantities like $I(t)$ with discrete-time vectors.
 Time-discretize $I_j$ as incidence in each slice and $w_k$ as probability mass in each slice:
 
 $$
@@ -98,23 +98,27 @@ $$
 $$
 
 Define $K \equiv \lceil T/\Delta t\rceil$, so that $\sum_{k=0}^{K-1} w_k = 1$.
-Discretize $R(t)$ simply as $R_j \equiv R(j \Delta t)$.
+To avoid problems of causality, require that $w_0 = 0$.
+(If you think there is substantial transmission happening in the first time slice, then use smaller time slices!)
 
 The renewal equation is then:
 
 $$
-  I_j \approx R_j \sum_{k=0}^{K-1} I_{j-k-1} w_k
+  I_j = R_j \sum_{k=0}^{K-1} I_{j-k} w_k
 $$
 
-where the $j - k - 1$ is a causal, right-endpoint convention to avoid $I_j$ contributing to $I_j$.
+where the $R_j$ are, trivially, the values requires to make this equation true.
+We expect that $R_j \approx R(j \Delta t)$.
 
 If working with growth rates, define the dimensionless, per-time-step growth increment $\tilde{r}_j \equiv \log (I_{j+1}/I_j)$ so that:
 
 $$
-  \log I_j \approx \log I_0 + \sum_{k=0}^{j-1} \tilde{r}_k
+  \log I_j = \log I_0 + \sum_{k=0}^{j-1} \tilde{r}_k
 $$
 
-These increments can be approximated from the Wallinga-Lipsitch growth rates, but need to take account of the size of the time slice:
+Note that the growth *increment* $\tilde{r}_j$ is a dimensionless number that depends on the time slice, while the growth *rate* $r(t)$ has per-time dimension.
+
+The increments can be approximated from the Wallinga-Lipsitch growth rates $r(t)$ but must account for the size of the time slice:
 
 $$
   \tilde{r}_j \approx r([j + 1] \Delta t) \cdot \Delta t
