@@ -14,8 +14,11 @@ $$
              = \int_0^\infty I(t - \tau) w(\tau) \,d\tau
 $$
 
-In practice, it is difficult to measure $R(t)$ and $w(\tau)$ directly.
-Instead, we used $I(t)$ to infer $R(t)$ and $w(\tau)$, then use those values to estimate $I(t)$ in the future.
+The generation interval distribution is normalized: $\int_0^\infty w(\tau) \,d\tau = 1$.
+
+In practice, it is difficult to measure $R(t)$ directly.
+Instead, we used $I(t)$ to infer $R(t)$ and then use those values to estimate $I(t)$ in the future.
+(The $w(\tau)$ are even more difficult to estimate.)
 
 ## Instantaneous growth rate
 
@@ -48,7 +51,7 @@ This equation is not practicable, so we make a simplifying approximation.
 ### Wallinga-Lipsitch approximation
 
 Assume there is some finite generation interval $T$ such that $w(\tau) = 0$ for $\tau > T$.
-For $t > T$, the renewal equation is:
+Then the renewal equation is:
 
 $$
   I(t) = R(t) \int_0^T I(t - \tau) w(\tau) \,d\tau
@@ -59,7 +62,7 @@ with upper integral limit $T$.
 At each time $t$, assume that $r(t)$ is approximately constant over the prior period $T$, so that:
 
 $$
-  I(t - \tau) = I(t) \exp \left\{ \int_{t-\tau}^t r(s) \,ds \right\}
+  I(t - \tau) = I(t) \exp \left\{ -\int_{t-\tau}^t r(s) \,ds \right\}
               \approx I(t) e^{-r(t)\tau} \text{ for } 0 < \tau < T
 $$
 
@@ -81,13 +84,13 @@ $$
 $$
 
 For example, if $w(\tau)$ is a Dirac delta function, with mass at some $\tau^\star$, then $M_w(z) = e^{z \tau^\star}$, so that $R(t) \approx e^{r(t)\tau^\star}$.
-If $w(\tau)$ is exponentially distributed, with mean $\tau^\star$, then $M_w(z) = 1/( 1 - z\tau^\star)$ and $R(t) \approx 1 + r \tau^\star$.
+If $w(\tau)$ is exponentially distributed, with mean $\tau^\star$, then $M_w(z) = 1/( 1 - z\tau^\star)$ and $R(t) \approx 1 + r(t) \tau^\star$.
 
 ## Numerical methods
 
 ### Time discretization
 
-For sufficiently small time slices $\Delta t$, we can approximate $I(t)$, $R(t)$, and $w(\tau)$ as approximately stepwise constant.
+For sufficiently small time slices $\Delta t$, we can approximate continuous-time-varying quantities like $I(t)$ with discrete-time vectors.
 Time-discretize $I_j$ as incidence in each slice and $w_k$ as probability mass in each slice:
 
 $$
@@ -98,26 +101,31 @@ $$
 $$
 
 Define $K \equiv \lceil T/\Delta t\rceil$, so that $\sum_{k=0}^{K-1} w_k = 1$.
-Discretize $R(t)$ simply as $R_j \equiv R(j \Delta t)$.
+To avoid problems of causality, require that $w_0 = 0$.
+(If you think there is substantial transmission happening in the first time slice, then use smaller time slices!)
 
 The renewal equation is then:
 
 $$
-  I_j \approx R_j \sum_{k=0}^{K-1} I_{j-k-1} w_k
+  I_j = R_j \sum_{k=0}^{K-1} I_{j-k} w_k
 $$
 
-where the $j - k - 1$ is a causal, right-endpoint convention to avoid $I_j$ contributing to $I_j$.
+where the $R_j$ are, trivially, the values required to make this equation true.
+We expect that $R_j \approx R(j \Delta t)$.
 
 If working with growth rates, define the dimensionless, per-time-step growth increment $\tilde{r}_j \equiv \log (I_{j+1}/I_j)$ so that:
 
 $$
-  \log I_j \approx \log I_0 + \sum_{k=0}^{j-1} \tilde{r}_k
+  \log I_j = \log I_0 + \sum_{k=0}^{j-1} \tilde{r}_k
 $$
 
-These increments can be approximated from the Wallinga-Lipsitch growth rates, but need to take account of the size of the time slice:
+Note that the growth *increment* $\tilde{r}_j$ is a dimensionless number that depends on the time slice, while the growth *rate* $r(t)$ has per-time dimension.
+
+The increments can be approximated from the Wallinga-Lipsitch growth rates $r(t)$ but must account for the size of the time slice:
 
 $$
-  \tilde{r}_j \approx r([j + 1] \Delta t) \cdot \Delta t
+  \tilde{r}_j \approx r\left( \left[ j + \frac{1}{2} \right] \Delta t \right)
+                      \cdot \Delta t
 $$
 
 ### Initialization
@@ -137,9 +145,8 @@ If $R(0)$ is specified, and $w(\tau)$ has an analytically tractable moment gener
 If only the time-discretized $w_k$ is specified, then find the root of:
 
 $$
-  0
-  = \frac{1}{R(0)}
-    - \sum_{k=0}^{K-1} \exp\left\{ -r(0) \cdot \left( k + 1 \right) \Delta t \right\} w_k
+  0 = \frac{1}{R(0)}
+      - \sum_{k=0}^{K-1} \exp\left\{ -r(0) \cdot k \Delta t \right\} w_k
 $$
 
 ## Further reading
